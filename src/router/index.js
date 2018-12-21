@@ -2,12 +2,13 @@
  * @Author: TianYunPeng
  * @Date: 2018-12-20 21:16:39
  * @Last Modified by: TianYunPeng
- * @Last Modified time: 2018-12-20 21:19:02
+ * @Last Modified time: 2018-12-21 20:15:01
  */
 import Vue from 'vue'
 import Router from 'vue-router'
 import Login from '@/components/Login'
 import Home from '@/components/Home'
+import Users from '@/components/Users'
 
 Vue.use(Router)
 
@@ -23,7 +24,14 @@ const router = new Router({
     },
     {
       path: '/home',
-      component: Home
+      component: Home,
+      // 在路由中使用children属性来嵌套子路由
+      children: [
+        {
+          path: '/users',
+          component: Users
+        }
+      ]
     }
   ]
 })
