@@ -30,7 +30,13 @@
       </el-table-column>
       <el-table-column label="操作">
         <template slot-scope="scope">
-          <el-button type="primary" @click="shoeEditModal(scope.row)" icon="el-icon-edit" plain size="mini"></el-button>
+          <el-button
+            type="primary"
+            @click="shoeEditModal(scope.row)"
+            icon="el-icon-edit"
+            plain
+            size="mini"
+          ></el-button>
           <el-button
             type="danger"
             @click="delUser(scope.row.id)"
@@ -146,8 +152,8 @@ export default {
     }
   },
   methods: {
-    getUserList() {
-      this.axios({
+    async getUserList() {
+      let res = await this.axios({
         method: 'get',
         url: 'users',
         params: {
@@ -155,16 +161,15 @@ export default {
           pagenum: this.currentPage,
           pagesize: this.pageSize
         }
-      }).then(res => {
-        let {
-          meta: { status },
-          data: { users, total }
-        } = res
-        if (status === 200) {
-          this.userList = users
-          this.total = total
-        }
       })
+      let {
+        meta: { status },
+        data: { users, total }
+      } = res
+      if (status === 200) {
+        this.userList = users
+        this.total = total
+      }
     },
     handleSizeChange(val) {
       this.pageSize = val
@@ -178,96 +183,98 @@ export default {
       this.currentPage = 1
       this.getUserList()
     },
-    delUser(id) {
-      this.$confirm('你确定要删除吗?', '温馨提示', {
-        type: 'wraning'
-      })
-        .then(() => {
-          this.axios({
-            method: 'delete',
-            url: `users/${id}`,
-            headers: {
-              Authorization: localStorage.getItem('token')
-            }
-          }).then(res => {
-            let {
-              meta: { status }
-            } = res
-            if (status === 200) {
-              if (this.userList.length <= 1 && this.currentPage > 1) {
-                this.currentPage--
-              }
-              this.$message.success('删除成功')
-              this.getUserList()
-            }
-          })
+    async delUser(id) {
+      try {
+        await this.$confirm('你确定要删除吗?', '温馨提示', {
+          type: 'wraning'
         })
-        .catch(() => {
-          this.$message.info('取消删除')
+
+        let res = await this.axios({
+          method: 'delete',
+          url: `users/${id}`,
+          headers: {
+            Authorization: localStorage.getItem('token')
+          }
         })
+
+        let {
+          meta: { status }
+        } = res
+        if (status === 200) {
+          if (this.userList.length <= 1 && this.currentPage > 1) {
+            this.currentPage--
+          }
+          this.$message.success('删除成功')
+          this.getUserList()
+        }
+      } catch (e) {
+        this.$message.info('取消删除')
+      }
     },
-    updateState(user) {
-      console.log(user)
+    async updateState(user) {
       // 发送请求通过后台修改用户状态
-      this.axios({
+      let res = await this.axios({
         method: 'put',
         url: `users/${user.id}/state/${user.mg_state}`
-      }).then(res => {
-        if (res.meta.status === 200) {
-          this.$message.success('用户状态修改成功')
-        } else {
-          this.$message.error('抱歉,用户状态修改失败')
-        }
       })
+      if (res.meta.status === 200) {
+        this.$message.success('用户状态修改成功')
+      } else {
+        this.$message.error('抱歉,用户状态修改失败')
+      }
     },
     showAddModal() {
       this.addDdialogVisible = true
     },
     addUser() {
-      this.$refs.addForm.validate(valida => {
+      this.$refs.addForm.validate(async valida => {
         if (!valida) return false
-        this.axios({
+        let res = await this.axios({
           method: 'post',
           url: 'users',
           data: this.addForm
-        }).then(res => {
-          console.log(res)
-          let {
-            meta: { status }
-          } = res
-          if (status === 201) {
-            // 关闭模态框
-            this.addDdialogVisible = false
-            // 重新渲染
-            this.total++
-            this.currentPage = Math.ceil(this.total / this.pageSize)
-            this.getUserList()
-            // 重置表单
-            this.$refs.addForm.resetFields()
-          }
         })
+        let {
+          meta: { status }
+        } = res
+        if (status === 201) {
+          // 关闭模态框
+          this.addDdialogVisible = false
+          // 重新渲染
+          this.total++
+          this.currentPage = Math.ceil(this.total / this.pageSize)
+          this.getUserList()
+          // 重置表单
+          this.$refs.addForm.resetFields()
+        }
       })
     },
     shoeEditModal(user) {
-      console.log(user)
       this.editDdialogVisible = true
       this.editForm.id = user.id
       this.editForm.username = user.username
       this.editForm.email = user.email
       this.editForm.mobile = user.mobile
     },
-    updateUser () {
-      this.$refs.editForm.validate(valida => {
+    updateUser() {
+      this.$refs.editForm.validate(async valida => {
         if (!valida) return false
-        this.axios({
+        let res = await this.axios({
           method: 'put',
           url: `users/${this.editForm.id}`,
           data: this.editForm
-        }).then(res => {
+        })
+        let {
+          meta: { status }
+        } = res
+        if (status === 200) {
           this.editDdialogVisible = false
           this.$refs.editForm.resetFields()
           this.getUserList()
-        })
+          this.$message.success('修改成功')
+        } else {
+          this.$message.error('修改失败')
+        }
       })
     }
   },
@@ -278,13 +285,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.el-breadcrumb {
-  height: 50px;
-  line-height: 50px;
-  background-color: #fff;
-  border-radius: 10px;
-  padding-left: 15px;
-}
 .input-with-select {
   width: 350px;
   margin-bottom: 15px;

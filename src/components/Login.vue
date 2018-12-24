@@ -44,35 +44,31 @@ export default {
     },
     // 调用validate()方法实现登录功能
     login () {
-      this.$refs.form.validate(valid => {
-        if (valid) {
-          this.axios({
-            method: 'post',
-            url: 'login',
-            data: this.form
-          }).then(res => {
-            let {meta: {status}, data: {token}} = res
-            if (status === 200) {
-              // 通过message消息提示框实现消息提示
-              this.$message({
-                message: '登录成功',
-                type: 'success',
-                duration: 1000
-              })
-              // 将后台的token存到localStorage
-              localStorage.setItem('token', token)
-              // 通过编程式路由 router.$router.push()方法实现路由跳转
-              this.$router.push('/home')
-            } else {
-              this.$message({
-                message: '登录失败',
-                type: 'error',
-                duration: 1000
-              })
-            }
+      this.$refs.form.validate(async valid => {
+        if (!valid) return false
+        let res = await this.axios({
+          method: 'post',
+          url: 'login',
+          data: this.form
+        })
+        let {meta: {status}, data: {token}} = res
+        if (status === 200) {
+          // 通过message消息提示框实现消息提示
+          this.$message({
+            message: '登录成功',
+            type: 'success',
+            duration: 1000
           })
+          // 将后台的token存到localStorage
+          localStorage.setItem('token', token)
+          // 通过编程式路由 router.$router.push()方法实现路由跳转
+          this.$router.push('/home')
         } else {
-          return false
+          this.$message({
+            message: '登录失败',
+            type: 'error',
+            duration: 1000
+          })
         }
       })
     }
