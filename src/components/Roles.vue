@@ -10,7 +10,7 @@
     <el-table :data="rolesList">
       <el-table-column type="expand">
         <template slot-scope="{row}">
-        <span v-if="row.children.length === 0">暂无权限</span>
+          <span v-if="row.children.length === 0">暂无权限</span>
           <!-- 显示一级权限 -->
           <el-row class="level1" v-for="level1 in row.children" :key="level1.id">
             <el-col :span="4">
@@ -62,7 +62,14 @@
     </el-table>
     <!-- 分配权限对话框 -->
     <el-dialog title="分配权限" :visible.sync="assignDialogVisible" width="40%">
-      <el-tree ref="tree" node-key="id" :data="data" :props="defaultProps" show-checkbox default-expand-all></el-tree>
+      <el-tree
+        ref="tree"
+        node-key="id"
+        :data="data"
+        :props="defaultProps"
+        show-checkbox
+        default-expand-all
+      ></el-tree>
       <span slot="footer" class="dialog-footer">
         <el-button @click="assignDialogVisible = false">取 消</el-button>
         <el-button type="primary" @click="assignRight">分 配</el-button>
@@ -114,7 +121,10 @@ export default {
       this.assignDialogVisible = true
       this.roleId = role.id
       let res = await this.axios.get('rights/tree')
-      let {meta: {status}, data} = res
+      let {
+        meta: { status },
+        data
+      } = res
       if (status === 200) {
         this.data = data
       }
@@ -130,13 +140,15 @@ export default {
       })
       this.$refs.tree.setCheckedKeys(ids)
     },
-    async assignRight () {
+    async assignRight() {
       let checkedKeys = this.$refs.tree.getCheckedKeys()
       let halfcheckedKeys = this.$refs.tree.getHalfCheckedKeys()
       let rids = checkedKeys.concat(halfcheckedKeys).join()
       // 发送ajax请求
-      let res = await this.axios.post(`roles/${this.roleId}/rights`, {rids})
-      let {meta: {status}} = res
+      let res = await this.axios.post(`roles/${this.roleId}/rights`, { rids })
+      let {
+        meta: { status }
+      } = res
       if (status === 200) {
         this.getRolesList()
         this.assignDialogVisible = false
