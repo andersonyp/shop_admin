@@ -2,15 +2,15 @@
  * @Author: TianYunPeng
  * @Date: 2018-12-20 21:16:39
  * @Last Modified by: TianYunPeng
- * @Last Modified time: 2018-12-24 20:42:11
+ * @Last Modified time: 2018-12-26 11:45:47
  */
 import Vue from 'vue'
 import Router from 'vue-router'
 import Login from '@/components/Login'
 import Home from '@/components/Home'
-import Users from '@/components/Users'
-import Rights from '@/components/Rights'
-import Roles from '@/components/Roles'
+import Users from '@/components/users/Users'
+import Rights from '@/components/rights/Rights'
+import Roles from '@/components/rights/Roles'
 
 Vue.use(Router)
 
