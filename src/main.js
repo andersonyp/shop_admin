@@ -2,6 +2,7 @@ import Vue from 'vue'
 import App from './App'
 import router from './router'
 import ElementUI from 'element-ui'
+import ElTreeGrid from 'element-tree-grid'
 
 // 引入element-ui的样式
 import 'element-ui/lib/theme-chalk/index.css'
@@ -10,6 +11,18 @@ import 'element-ui/lib/theme-chalk/index.css'
 import '@/assets/index.less'
 // 引入axios
 import axios from 'axios'
+// 引入富文本编辑器
+import VueQuillEditor from 'vue-quill-editor'
+
+// 引入样式
+import 'quill/dist/quill.core.css'
+import 'quill/dist/quill.snow.css'
+import 'quill/dist/quill.bubble.css'
+
+// 启用编辑器
+Vue.use(VueQuillEditor)
+
+Vue.component('el-table-tree-column', ElTreeGrid)
 // 将axios挂到Vue实例上
 Vue.prototype.axios = axios
 // 配置全局默认值

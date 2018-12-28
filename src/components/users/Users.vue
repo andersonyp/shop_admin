@@ -44,7 +44,13 @@
             plain
             size="mini"
           ></el-button>
-          <el-button type="success" icon="el-icon-check" plain size="mini">分配角色</el-button>
+          <el-button
+            type="success"
+            @click="showAssignDialog(scope.row)"
+            icon="el-icon-check"
+            plain
+            size="mini"
+          >分配角色</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -81,7 +87,7 @@
       </span>
     </el-dialog>
     <!-- 修改模态框 -->
-    <el-dialog title="添加用户" :visible.sync="editDdialogVisible" width="40%">
+    <el-dialog title="修改用户" :visible.sync="editDdialogVisible" width="40%">
       <el-form ref="editForm" :model="editForm" :rules="rules" status-icon label-width="80px">
         <el-form-item label="用户名" prop="username">
           <el-tag type="info">{{editForm.username}}</el-tag>
@@ -98,6 +104,28 @@
         <el-button type="primary" @click="updateUser">确 定</el-button>
       </span>
     </el-dialog>
+    <!-- 分配角色模态框 -->
+    <el-dialog title="分配角色" :visible.sync="assignDdialogVisible" width="40%">
+      <el-form ref="assignForm" :model="assignForm" :rules="rules" status-icon label-width="80px">
+        <el-form-item label="用户名" prop="username">
+          <el-tag type="info">{{assignForm.username}}</el-tag>
+        </el-form-item>
+        <el-form-item label="角色列表" prop="roleList">
+          <el-select v-model="assignForm.rid" placeholder="请选择">
+            <el-option
+              v-for="item in roleList"
+              :key="item.id"
+              :label="item.roleName"
+              :value="item.id"
+            ></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="assignDdialogVisible= false">取 消</el-button>
+        <el-button type="primary" @click="assignRole">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -112,6 +140,7 @@ export default {
       total: 0,
       addDdialogVisible: false,
       editDdialogVisible: false,
+      assignDdialogVisible: false,
       addForm: {
         username: '',
         password: '',
@@ -148,7 +177,13 @@ export default {
         username: '',
         email: '',
         mobile: ''
-      }
+      },
+      assignForm: {
+        id: '',
+        username: '',
+        rid: ''
+      },
+      roleList: []
     }
   },
   methods: {
@@ -276,6 +311,45 @@ export default {
           this.$message.error('修改失败')
         }
       })
+    },
+    // 根据id获取用户数据
+    async getUserInfo(id) {
+      let res = await this.axios.get(`users/${id}`)
+      if (res.meta.status === 200) {
+        let rid = res.data.rid
+        if (rid === -1) {
+          rid = ''
+        }
+        this.assignForm.rid = rid
+      }
+    },
+    // 显示分配角色模态框
+    async showAssignDialog(user) {
+      this.assignDdialogVisible = true
+      this.assignForm.username = user.username
+      this.assignForm.id = user.id
+
+      this.getUserInfo(user.id)
+      let res = await this.axios.get('roles')
+      if (res.meta.status === 200) {
+        this.roleList = res.data
+      }
+    },
+    // 点击确实按钮给用户分配角色
+    async assignRole() {
+      if (!this.assignForm.rid) {
+        this.$message.warning('请选择一个角色')
+        return
+      }
+      let res = await this.axios.put(`users/${this.assignForm.id}/role`, {
+        rid: this.assignForm.rid
+      })
+      console.log(res)
+      if (res.meta.status === 200) {
+        this.assignDdialogVisible = false
+        this.getUserList()
+        this.$message.success('角色分配成功')
+      }
     }
   },
   created() {

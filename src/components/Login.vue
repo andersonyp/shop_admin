@@ -80,7 +80,7 @@ export default {
 .login {
   width: 100%;
   height: 100%;
-  background-color: #2d434c;
+  background-color: salmon;
   overflow: hidden;
   .el-form {
     width: 400px;
